@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import Icon, { type IconName } from './Icon';
 import type { CommandName } from '../lib/editorCommands';
+import { FONT_SIZE } from '../lib/storage';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 export const MOD = isMac ? '⌘' : 'Ctrl';
@@ -43,9 +44,61 @@ const GROUPS: ToolButton[][] = [
 interface ToolbarProps {
   onCommand: (command: CommandName) => void;
   onImages: (files: File[]) => void;
+  fontSize: number;
+  onFontSize: (size: number) => void;
 }
 
-export default function Toolbar({ onCommand, onImages }: ToolbarProps) {
+function FontSizeControl({ size, onChange }: { size: number; onChange: (size: number) => void }) {
+  return (
+    <div className="font-size" role="group" aria-label="Editor text size" title={`Editor text size (or ${MOD} + scroll wheel)`}>
+      <button
+        type="button"
+        className="tool-btn"
+        aria-label="Smaller text"
+        title="Smaller text"
+        disabled={size <= FONT_SIZE.min}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onChange(size - 1)}
+      >
+        <span className="font-glyph small">A</span>
+      </button>
+      <input
+        type="range"
+        className="font-slider"
+        min={FONT_SIZE.min}
+        max={FONT_SIZE.max}
+        step={1}
+        value={size}
+        aria-label="Editor text size"
+        aria-valuetext={`${size} pixels`}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+      <button
+        type="button"
+        className="tool-btn"
+        aria-label="Larger text"
+        title="Larger text"
+        disabled={size >= FONT_SIZE.max}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onChange(size + 1)}
+      >
+        <span className="font-glyph large">A</span>
+      </button>
+      <button
+        type="button"
+        className="font-size-value"
+        title="Reset text size"
+        aria-label={`Text size ${size}px, reset to ${FONT_SIZE.default}px`}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onChange(FONT_SIZE.default)}
+      >
+        {size}px
+      </button>
+    </div>
+  );
+}
+
+export default function Toolbar({ onCommand, onImages, fontSize, onFontSize }: ToolbarProps) {
   const fileInput = useRef<HTMLInputElement>(null);
 
   return (
@@ -80,6 +133,7 @@ export default function Toolbar({ onCommand, onImages }: ToolbarProps) {
           )}
         </div>
       ))}
+      <FontSizeControl size={fontSize} onChange={onFontSize} />
       <input
         ref={fileInput}
         type="file"

@@ -1,12 +1,13 @@
 import katex from 'katex';
 import markdownCss from '../styles/markdown.css?raw';
+import type { ResolvedTheme } from './storage';
 
 function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 /** Build a standalone HTML document from the rendered preview. */
-export function buildStandaloneHtml(title: string, bodyHtml: string, theme: 'light' | 'dark'): string {
+export function buildStandaloneHtml(title: string, bodyHtml: string, theme: ResolvedTheme): string {
   return `<!doctype html>
 <html lang="en" data-theme="${theme}">
 <head>

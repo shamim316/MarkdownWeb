@@ -79,6 +79,44 @@
   --shadow: 0 8px 24px #00000080, 0 2px 6px #00000060;
 }
 
+:root[data-theme='grey'] {
+  --bg: #33373d;
+  --surface: #3b4047;
+  --surface-2: #454b53;
+  --border: #535a63;
+  --text: #eceff3;
+  --text-muted: #c0c7cf;
+  --text-faint: #9aa3ad;
+  --accent: #7aa7ff;
+  --accent-hover: #93b8ff;
+  --accent-soft: #7aa7ff40;
+  --accent-contrast: #1d2025;
+  --hover: #ffffff14;
+
+  --saved: #4ade80;
+  --saved-soft: #4ade8026;
+  --unsaved: #eab308;
+  --unsaved-glow: #fde047;
+
+  --editor-bg: #383d44;
+  --editor-active-line: #ffffff0a;
+  --editor-selection: #7aa7ff59;
+  --editor-match: #facc1538;
+
+  --syn-heading: #9cc4ff;
+  --syn-link: #8ab4ff;
+  --syn-code: #ffab70;
+  --syn-mark: #9aa3ad;
+  --syn-keyword: #ff8f87;
+  --syn-string: #b4dcff;
+  --syn-number: #8fcaff;
+  --syn-function: #dcbaff;
+  --syn-type: #ffb77a;
+  --syn-property: #8ee69a;
+
+  --shadow: 0 8px 24px #0000006b, 0 2px 6px #0000004d;
+}
+
 *,
 *::before,
 *::after {
@@ -760,6 +798,7 @@ button {
 
 @media print {
   :root,
+  :root[data-theme='grey'],
   :root[data-theme='dark'] {
     --md-text: #1f2328;
     --md-muted: #59636e;

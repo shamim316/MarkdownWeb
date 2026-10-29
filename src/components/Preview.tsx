@@ -1,4 +1,5 @@
 import { useImperativeHandle, useLayoutEffect, useRef, type Ref } from 'react';
+import type { ResolvedTheme } from '../lib/storage';
 
 export interface PreviewHandle {
   scrollToLine: (line: number, fraction: number) => void;
@@ -10,7 +11,7 @@ interface PreviewProps {
   ref?: Ref<PreviewHandle>;
   html: string;
   totalLines: number;
-  dark: boolean;
+  theme: ResolvedTheme;
   onScroll: (line: number, fraction: number) => void;
 }
 
@@ -20,12 +21,34 @@ let mermaidTheme: string | null = null;
 let diagramCounter = 0;
 const svgCache = new Map<string, string>();
 
-async function getMermaid(dark: boolean): Promise<MermaidApi> {
+type MermaidConfig = Parameters<MermaidApi['initialize']>[0];
+
+const MERMAID_THEMES: Record<ResolvedTheme, MermaidConfig> = {
+  light: { theme: 'default' },
+  dark: { theme: 'dark' },
+  // Mermaid has no mid-grey theme; derive one from its base theme to match the grey palette.
+  grey: {
+    theme: 'base',
+    themeVariables: {
+      darkMode: true,
+      background: '#3a3f46',
+      mainBkg: '#4a5058',
+      primaryColor: '#4a5058',
+      primaryTextColor: '#eceff3',
+      primaryBorderColor: '#9aa3ad',
+      secondaryColor: '#454b53',
+      tertiaryColor: '#42474f',
+      lineColor: '#c0c7cf',
+      textColor: '#eceff3',
+    },
+  },
+};
+
+async function getMermaid(theme: ResolvedTheme): Promise<MermaidApi> {
   mermaidPromise ??= import('mermaid').then((m) => m.default);
   const mermaid = await mermaidPromise;
-  const theme = dark ? 'dark' : 'default';
   if (mermaidTheme !== theme) {
-    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme, fontFamily: 'inherit' });
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', fontFamily: 'inherit', ...MERMAID_THEMES[theme] });
     mermaidTheme = theme;
   }
   return mermaid;
@@ -43,19 +66,19 @@ function escapeText(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 }
 
-async function renderDiagrams(root: HTMLElement, dark: boolean): Promise<void> {
+async function renderDiagrams(root: HTMLElement, theme: ResolvedTheme): Promise<void> {
   const blocks = [...root.querySelectorAll<HTMLElement>('.mermaid-block')];
   const pending: HTMLElement[] = [];
   for (const block of blocks) {
-    const cached = svgCache.get(`${dark}:${diagramSource(block)}`);
+    const cached = svgCache.get(`${theme}:${diagramSource(block)}`);
     if (cached !== undefined) block.innerHTML = cached;
     else pending.push(block);
   }
   if (!pending.length) return;
-  const mermaid = await getMermaid(dark);
+  const mermaid = await getMermaid(theme);
   for (const block of pending) {
     const source = diagramSource(block);
-    const key = `${dark}:${source}`;
+    const key = `${theme}:${source}`;
     let html = svgCache.get(key);
     if (html === undefined) {
       const id = `mermaid-${++diagramCounter}`;
@@ -78,7 +101,7 @@ interface Anchor {
   top: number;
 }
 
-export default function Preview({ ref, html, totalLines, dark, onScroll }: PreviewProps) {
+export default function Preview({ ref, html, totalLines, theme, onScroll }: PreviewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const suppressScroll = useRef(0);
@@ -86,8 +109,8 @@ export default function Preview({ ref, html, totalLines, dark, onScroll }: Previ
   useLayoutEffect(() => {
     const el = contentRef.current!;
     el.innerHTML = html;
-    void renderDiagrams(el, dark);
-  }, [html, dark]);
+    void renderDiagrams(el, theme);
+  }, [html, theme]);
 
   const anchors = (): Anchor[] => {
     const content = contentRef.current;

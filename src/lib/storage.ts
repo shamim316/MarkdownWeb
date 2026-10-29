@@ -34,7 +34,9 @@ export interface Draft {
   savedAt: number;
 }
 
-export type ThemePref = 'system' | 'light' | 'dark';
+export type ThemePref = 'system' | 'light' | 'grey' | 'dark';
+/** The theme actually applied to the page. */
+export type ResolvedTheme = 'light' | 'grey' | 'dark';
 export type ViewMode = 'split' | 'editor' | 'preview';
 
 export interface Prefs {

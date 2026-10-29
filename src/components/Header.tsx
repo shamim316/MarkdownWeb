@@ -22,8 +22,13 @@ interface HeaderProps {
   onScrollSync: () => void;
 }
 
-const THEME_LABEL: Record<ThemePref, string> = { system: 'System theme', light: 'Light theme', dark: 'Dark theme' };
-const THEME_ICON = { system: 'monitor', light: 'sun', dark: 'moon' } as const;
+const THEME_LABEL: Record<ThemePref, string> = {
+  system: 'System theme',
+  light: 'Light theme',
+  grey: 'Grey theme',
+  dark: 'Dark theme',
+};
+const THEME_ICON = { system: 'monitor', light: 'sun', grey: 'contrast', dark: 'moon' } as const;
 
 export function SaveStatus({ dirty }: { dirty: boolean }) {
   return dirty ? (

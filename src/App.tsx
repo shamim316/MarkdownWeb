@@ -26,6 +26,7 @@ import {
   saveJson,
   type Draft,
   type Prefs,
+  type ResolvedTheme,
   type ThemePref,
   clampFontSize,
 } from './lib/storage';
@@ -69,10 +70,10 @@ export default function App() {
 
   // Theme
   const systemDark = useSystemDark();
-  const dark = prefs.theme === 'dark' || (prefs.theme === 'system' && systemDark);
+  const theme: ResolvedTheme = prefs.theme === 'system' ? (systemDark ? 'dark' : 'light') : prefs.theme;
   useEffect(() => {
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  }, [dark]);
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => saveJson(PREFS_KEY, prefs), [prefs]);
   const updatePrefs = (patch: Partial<Prefs>) => setPrefs((p) => ({ ...p, ...patch }));
@@ -195,7 +196,7 @@ export default function App() {
   const exportHtml = () => {
     const body = previewRef.current?.getRenderedHtml() ?? renderMarkdown(content);
     const title = fileName.replace(/\.(md|markdown|mdown|txt)$/i, '');
-    downloadFile(htmlFileName(fileName), buildStandaloneHtml(title, body, dark ? 'dark' : 'light'), 'text/html;charset=utf-8');
+    downloadFile(htmlFileName(fileName), buildStandaloneHtml(title, body, theme), 'text/html;charset=utf-8');
   };
 
   const print = () => {
@@ -275,7 +276,7 @@ export default function App() {
   const setFontSize = (size: number) => updatePrefs({ editorFontSize: clampFontSize(size) });
 
   const cycleTheme = () => {
-    const order: ThemePref[] = ['system', 'light', 'dark'];
+    const order: ThemePref[] = ['system', 'light', 'grey', 'dark'];
     updatePrefs({ theme: order[(order.indexOf(prefs.theme) + 1) % order.length] });
   };
 
@@ -357,7 +358,7 @@ export default function App() {
 
         <section className="pane preview-pane" aria-label="Preview">
           <div className="pane-header">Preview</div>
-          <Preview ref={previewRef} html={html} totalLines={totalLines} dark={dark} onScroll={onPreviewScroll} />
+          <Preview ref={previewRef} html={html} totalLines={totalLines} theme={theme} onScroll={onPreviewScroll} />
         </section>
       </main>
 

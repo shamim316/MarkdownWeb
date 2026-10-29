@@ -40,3 +40,7 @@ npm run build      # static build in dist/
 ```
 
 The build is fully static and uses relative paths, so `dist/` can be hosted anywhere (GitHub Pages, Netlify, any file server). The File System Access API requires a secure context (HTTPS or `localhost`).
+
+## Deployment
+
+`.github/workflows/deploy.yml` tests and builds every pull request, and deploys `main` to GitHub Pages. One-time setup: in the repository's **Settings → Pages**, set **Source** to **GitHub Actions**. The site is then served at `https://<owner>.github.io/<repo>/`.

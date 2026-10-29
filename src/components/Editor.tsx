@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useRef, type Ref } from 'react';
+import { useEffect, useImperativeHandle, useRef, type CSSProperties, type Ref } from 'react';
 import { EditorState, type Extension } from '@codemirror/state';
 import {
   EditorView,
@@ -40,6 +40,9 @@ interface EditorProps {
   onCursor: (cursor: CursorInfo) => void;
   /** Reports the top visible source line (0-based) plus how far into that line we are (0..1). */
   onScroll: (line: number, fraction: number) => void;
+  fontSize: number;
+  /** Ctrl/⌘ + mouse wheel over the editor; delta is +1 (bigger) or -1 (smaller). */
+  onZoom: (delta: number) => void;
 }
 
 // Colours come from CSS variables so light/dark switching needs no reconfiguration.
@@ -47,7 +50,7 @@ const editorTheme = EditorView.theme({
   '&': { height: '100%', backgroundColor: 'var(--editor-bg)', color: 'var(--text)' },
   '.cm-scroller': {
     fontFamily: 'var(--font-mono)',
-    fontSize: '14px',
+    fontSize: 'var(--editor-font-size, 14px)',
     lineHeight: '1.65',
   },
   '.cm-content': { padding: '16px 0', caretColor: 'var(--accent)' },
@@ -125,11 +128,11 @@ function imageFiles(list: FileList | null | undefined): File[] {
   return list ? [...list].filter((f) => f.type.startsWith('image/')) : [];
 }
 
-export default function Editor({ ref, initialContent, onChange, onCursor, onScroll }: EditorProps) {
+export default function Editor({ ref, initialContent, onChange, onCursor, onScroll, fontSize, onZoom }: EditorProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
-  const callbacks = useRef({ onChange, onCursor, onScroll });
-  callbacks.current = { onChange, onCursor, onScroll };
+  const callbacks = useRef({ onChange, onCursor, onScroll, onZoom });
+  callbacks.current = { onChange, onCursor, onScroll, onZoom };
   // Set while we scroll the editor programmatically, so it doesn't echo back to the preview.
   const suppressScroll = useRef(0);
   const extensionsRef = useRef<Extension[]>([]);
@@ -188,6 +191,12 @@ export default function Editor({ ref, initialContent, onChange, onCursor, onScro
           const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
           if (pos !== null) view.dispatch({ selection: { anchor: pos } });
           void insertImagesRef.current(files);
+          return true;
+        },
+        wheel(event) {
+          if (!(event.ctrlKey || event.metaKey) || event.deltaY === 0) return false;
+          event.preventDefault();
+          callbacks.current.onZoom(event.deltaY < 0 ? 1 : -1);
           return true;
         },
         scroll(_event, view) {
@@ -252,5 +261,16 @@ export default function Editor({ ref, initialContent, onChange, onCursor, onScro
     }),
   );
 
-  return <div className="editor-host" ref={hostRef} />;
+  // Line heights change with the font size, so CodeMirror must re-measure.
+  useEffect(() => {
+    viewRef.current?.requestMeasure();
+  }, [fontSize]);
+
+  return (
+    <div
+      className="editor-host"
+      ref={hostRef}
+      style={{ '--editor-font-size': `${fontSize}px` } as CSSProperties}
+    />
+  );
 }

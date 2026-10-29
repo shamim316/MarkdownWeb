@@ -42,6 +42,19 @@ export interface Prefs {
   split: number;
   view: ViewMode;
   scrollSync: boolean;
+  editorFontSize: number;
 }
 
-export const DEFAULT_PREFS: Prefs = { theme: 'system', split: 0.5, view: 'split', scrollSync: true };
+export const FONT_SIZE = { min: 10, max: 32, default: 14 } as const;
+
+export function clampFontSize(size: number): number {
+  return Math.min(FONT_SIZE.max, Math.max(FONT_SIZE.min, Math.round(size)));
+}
+
+export const DEFAULT_PREFS: Prefs = {
+  theme: 'system',
+  split: 0.5,
+  view: 'split',
+  scrollSync: true,
+  editorFontSize: FONT_SIZE.default,
+};

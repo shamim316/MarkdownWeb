@@ -15,6 +15,7 @@ A browser-based markdown editor with a live preview. Write markdown on the left,
 - **Draft recovery**: unsaved work is kept in browser storage and offered back after a crash or accidental close; you're warned before leaving with unsaved changes.
 - **Rename** by clicking the file name (in Chrome/Edge the next save asks where to save the renamed file).
 - **Export** standalone HTML, or print / save as PDF (prints only the rendered document).
+- **Editor text size**: A− / A+ buttons, a slider, or `Ctrl/⌘` + scroll wheel over the editor (10–32px; click the size to reset). Remembered between visits.
 - Light / dark / system theme, word count, reading time and cursor position.
 
 ## Keyboard shortcuts

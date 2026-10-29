@@ -27,6 +27,7 @@ import {
   type Draft,
   type Prefs,
   type ThemePref,
+  clampFontSize,
 } from './lib/storage';
 
 const UNTITLED = 'Untitled.md';
@@ -56,7 +57,10 @@ export default function App() {
   const [savedFileName, setSavedFileName] = useState(UNTITLED);
   const [cursor, setCursor] = useState<CursorInfo>({ line: 1, col: 1 });
   const [html, setHtml] = useState(() => renderMarkdown(SAMPLE_DOCUMENT));
-  const [prefs, setPrefs] = useState<Prefs>(() => ({ ...DEFAULT_PREFS, ...loadJson<Partial<Prefs>>(PREFS_KEY) }));
+  const [prefs, setPrefs] = useState<Prefs>(() => {
+    const stored = { ...DEFAULT_PREFS, ...loadJson<Partial<Prefs>>(PREFS_KEY) };
+    return { ...stored, editorFontSize: clampFontSize(Number(stored.editorFontSize) || DEFAULT_PREFS.editorFontSize) };
+  });
   const [recovered, setRecovered] = useState<Draft | null>(() => loadJson<Draft>(DRAFT_KEY));
   const [toast, setToast] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -268,6 +272,8 @@ export default function App() {
     e.preventDefault();
   };
 
+  const setFontSize = (size: number) => updatePrefs({ editorFontSize: clampFontSize(size) });
+
   const cycleTheme = () => {
     const order: ThemePref[] = ['system', 'light', 'dark'];
     updatePrefs({ theme: order[(order.indexOf(prefs.theme) + 1) % order.length] });
@@ -318,13 +324,20 @@ export default function App() {
 
       <main className="workspace" ref={mainRef} style={{ '--split': prefs.split } as React.CSSProperties}>
         <section className="pane editor-pane" aria-label="Editor">
-          <Toolbar onCommand={runCommand} onImages={(files) => void editorRef.current?.insertImages(files)} />
+          <Toolbar
+            onCommand={runCommand}
+            onImages={(files) => void editorRef.current?.insertImages(files)}
+            fontSize={prefs.editorFontSize}
+            onFontSize={setFontSize}
+          />
           <Editor
             ref={editorRef}
             initialContent={SAMPLE_DOCUMENT}
             onChange={setContent}
             onCursor={setCursor}
             onScroll={onEditorScroll}
+            fontSize={prefs.editorFontSize}
+            onZoom={(delta) => setFontSize(prefs.editorFontSize + delta)}
           />
         </section>
 

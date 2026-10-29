@@ -21,8 +21,9 @@
   --unsaved-glow: #facc15;
 
   --editor-bg: #ffffff;
-  --editor-active-line: #f6f8fa;
-  --editor-selection: #2563eb2e;
+  /* Must stay translucent: the active line is drawn above the selection layer. */
+  --editor-active-line: #0f172a08;
+  --editor-selection: #2563eb40;
   --editor-match: #facc1540;
 
   --syn-heading: #0f3d91;
@@ -60,8 +61,8 @@
   --unsaved-glow: #fde047;
 
   --editor-bg: #0f1318;
-  --editor-active-line: #161b22;
-  --editor-selection: #4f8cff40;
+  --editor-active-line: #ffffff08;
+  --editor-selection: #4f8cff55;
   --editor-match: #facc1530;
 
   --syn-heading: #79b8ff;
@@ -563,6 +564,56 @@ button {
   color: var(--text);
 }
 
+.tool-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: none;
+}
+
+.font-size {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.font-glyph {
+  font-weight: 600;
+  line-height: 1;
+}
+
+.font-glyph.small {
+  font-size: 11px;
+}
+
+.font-glyph.large {
+  font-size: 16px;
+}
+
+.font-slider {
+  width: 84px;
+  margin: 0 2px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.font-size-value {
+  min-width: 42px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.font-size-value:hover {
+  color: var(--text);
+}
+
 .tool-text {
   font-size: 12px;
   font-weight: 700;
@@ -650,7 +701,8 @@ button {
 
   .logo,
   .header-divider,
-  .hide-narrow {
+  .hide-narrow,
+  .font-slider {
     display: none;
   }
 
